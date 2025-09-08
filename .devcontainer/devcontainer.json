@@ -1,4 +1,46 @@
-{
+{#!/bin/bash
+# deploy.sh - Full repo deploy to GitHub with devcontainer setup
+
+# --- CONFIG ---
+REPO_URL="https://github.com/Kri5p3y97/Repo.git"
+BRANCH="main"
+
+# --- SAFETY CHECK ---
+echo "Starting full repo deploy..."
+read -p "Warning: This may overwrite remote changes. Continue? (y/n): " CONFIRM
+if [[ "$CONFIRM" != "y" ]]; then
+    echo "Deploy aborted."
+    exit 1
+fi
+
+# --- INITIALIZE GIT ---
+if [ ! -d ".git" ]; then
+    git init
+    echo "Git repo initialized."
+fi
+
+# --- ADD REMOTE ---
+git remote remove origin 2>/dev/null
+git remote add origin $REPO_URL
+echo "Remote set to $REPO_URL"
+
+# --- STAGE & COMMIT ---
+git add .
+git commit -m "Full repo push: apply all updates" 2>/dev/null || echo "No changes to commit."
+
+# --- BRANCH & PUSH ---
+git branch -M $BRANCH
+git push -u origin $BRANCH --force
+echo "Repo successfully pushed to GitHub."
+
+# --- DEVCONTAINER SETUP ---
+if [ -f ".devcontainer/devcontainer.json" ]; then
+    echo "Devcontainer found. You can now open this repo in VS Code and it will auto-setup the environment."
+else
+    echo "No devcontainer.json detected. Skipping devcontainer setup."
+fi
+
+echo "Deployment complete ✅"
   "image": "mcr.microsoft.com/devcontainers/universal:2",
   "features": {}
 }
